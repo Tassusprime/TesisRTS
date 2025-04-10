@@ -58,3 +58,15 @@ creamos un archivo
 ```{r}
 usethis::edit_file("prueba_estad_tesis.qmd")
 ```
+
+ignorando archivos
+
+```{r}
+usethis::edit_file(".gitignore")
+```
+
+lanzando el proyecto
+
+```{r}
+usethis::use_github()
+```

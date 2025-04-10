@@ -72,11 +72,17 @@ ahora el rcompendium
 
 ```{r}
 rcompendium::set_credentials(
-  given = "tu nombre"
-  family = "tu apellido"
-  email = "tu correo"
+  given = "Rodolfo"
+  family = "Taso"
+  email = "rodolfo.tasso@gmail.com"
   orcid = "tu orcid"
 )
+```
+
+crear compendio
+
+```{r}
+rcompendium::new_compendium()
 ```
 
 agregar mas archivos al proyecto
