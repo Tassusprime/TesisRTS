@@ -1,0 +1,42 @@
+---
+title: "Pasos preliminares que no pueden saltarse para trabajar con git"
+format: html
+editor: visual
+---
+
+## Como crear el token (dura 30 dias, o se puede poner indefinido).
+
+```{r eval=FALSE}
+install.packages("usethis")
+library(usethis)
+```
+
+```{r}
+usethis::
+```
+
+Solicitud de creación del token, con esto pedimos y editamos el tipo de token y acceso.
+
+```{r}
+usethis::create_github_token()
+```
+
+Con esto ponemos el token correspondiente al proyecto que estamos creando.
+
+No se pega ahi mismo, se puede usar si segun lo probe la primera vez. Aunque no se como paso. Ahora no pasa.
+
+```{r}
+gitcreds::gitcreds_set()
+```
+
+situation report, con esto podemos confirmar credenciales
+
+```{r}
+usethis::git_sitrep()
+```
+
+nombre de la rama
+
+```{r}
+usethis::git_default_branch_configure(name = "Tesis")
+```
