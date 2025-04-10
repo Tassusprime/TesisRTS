@@ -1,0 +1,86 @@
+---
+title: "Archivo segundo curso prealfa"
+format: html
+editor: visual
+---
+
+## prealfa 
+
+comandos remote
+
+```{r}
+if (!require("remotes")) install.packages("remotes")
+remotes::install_github("FRBCesab/rcompendium")
+remotes::install_github("benmarwick/rrtools")
+```
+
+instalando paquetes en caso de no tenerlos
+
+```{r}
+if (!require("pak")) install.packages("pak")
+new <- c("gh",
+         "usethis",
+         "tidyverse",
+         "here",
+         "yaml",
+         "renv")
+pak::pak(new)
+
+```
+
+Verificar configuracion github
+
+```{r}
+gh::gh_whoami()
+```
+
+En caso de no estar logueado
+
+```{r eval=FALSE}
+gert::git_config_global_set(name = "user.name", value = "nombre de usuario")
+gert::git_config_global_set(name = "user.email", value = "mail")
+gert::git_config_global_set(name = "github.user", value = "nick")
+```
+
+usar el sitrep
+
+```{r}
+usethis::git_sitrep()
+```
+
+crear el token en caso de no tenerlo
+
+```{r}
+usethis::create_github_token()
+```
+
+configurar token, escoges la opciones y copias el codigo del token (te da la opcion copiar)
+
+```{r}
+gitcreds::gitcreds_set()
+```
+
+Vuelve a correr sitrep
+
+setea la rama como se setea en alfa
+
+```{r}
+usethis::git_default_branch_configure(name = "nombre de la rama")
+```
+
+ahora el rcompendium
+
+```{r}
+rcompendium::set_credentials(
+  given = "tu nombre"
+  family = "tu apellido"
+  email = "tu correo"
+  orcid = "tu orcid"
+)
+```
+
+agregar mas archivos al proyecto
+
+```{r}
+usethis::use_tidy_github()
+```
