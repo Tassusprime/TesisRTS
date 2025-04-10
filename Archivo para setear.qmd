@@ -40,3 +40,21 @@ nombre de la rama
 ```{r}
 usethis::git_default_branch_configure(name = "Tesis")
 ```
+
+Crear el proyecto (no se usa si empiezas por el proyecto)
+
+```{r}
+usethis::create_project(path = "Proyecto_Tesis")
+```
+
+Con el proyecto hecho, ya podemos usar git
+
+```{r}
+usethis::use_git()
+```
+
+creamos un archivo
+
+```{r}
+usethis::edit_file("prueba_estad_tesis.qmd")
+```
