@@ -2,7 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-.Rdata
+*.Rdata
 .httr-oauth
 .DS_Store
 .quarto
+*.csv
+/figures
