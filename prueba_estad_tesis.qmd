@@ -3,14 +3,96 @@ Librerias Necesarias
 ```{r}
 library(tidyverse)
 library(ggplot2)
+library(data.table)
+library(here)
 ```
 
 Cargar
 
 ```{r}
-rm(list = ls()) ##a pesar de que limpia el enviromet no limpia el proyecto de github
+rm(list = ls()) ##a pesar de que limpia el environmet no limpia el proyecto de github
 load("base_reducida.RData")
 ```
 
 View(datos_reducidos)
+
+## Descriptivos
+```{r}
+# Tamaño y estructura
+dim(datos_reducidos)
+str(datos_reducidos)
+summary(datos_reducidos)
+class(datos_reducidos)
+```
+Aprovechando pruebas para github
+
+```{r}
+# Revisar valores únicos en claves
+sapply(c("PERTENENCIA", "CONADI", "RSH", "PUEBLO_ORIGINARIO_BIN"), 
+       function(var) unique(datos_reducidos[[var]]))
+
+```
+
+ver completitud
+
+```{r}
+completitud <- datos_reducidos[, .(
+  PERTENENCIA_completo = mean(!is.na(PERTENENCIA)) * 100,
+  CONADI_completo = mean(!is.na(CONADI)) * 100,
+  RSH_completo = mean(!is.na(RSH)) * 100,
+  PUEBLO_BIN_completo = mean(!is.na(PUEBLO_ORIGINARIO_BIN)) * 100
+)]
+
+print(completitud)
+```
+
+completitud por año ACA HAY UN PROBLEMA
+
+```{r}
+##ACA HAY PROBLEMA
+datos_reducidos[, ANO_EGRESO := year(FECHA_EGRESO_FMT_DEIS)]
+completitud_anual <- datos_reducidos[, .(
+  PERTENENCIA = mean(!is.na(PERTENENCIA)) * 100,
+  CONADI = mean(!is.na(CONADI)) * 100,
+  RSH = mean(!is.na(RSH)) * 100,
+  PUEBLO_BIN = mean(!is.na(PUEBLO_ORIGINARIO_BIN)) * 100
+), by = ANO_EGRESO][order(ANO_EGRESO)]
+
+print(completitud_anual)
+```
+
+
+
+
+evaluando representatividad total
+
+```{r}
+representatividad <- datos_reducidos[, .(
+  PERTENENCIA_indigena = mean(PERTENENCIA == 1, na.rm = TRUE) * 100,
+  CONADI_indigena = mean(CONADI == 1, na.rm = TRUE) * 100,
+  RSH_indigena = mean(RSH == 1, na.rm = TRUE) * 100,
+  PUEBLO_BIN_indigena = mean(PUEBLO_ORIGINARIO_BIN == 1, na.rm = TRUE) * 100
+)]
+
+print(representatividad)
+```
+
+Ahora representatividad segun año
+
+```{r}
+# Extraer el año
+datos_reducidos[, ANO_EGRESO := year(FECHA_EGRESO_FMT_DEIS)]
+
+#repreentatividad por año
+representatividad_anual <- datos_reducidos[, .(
+  PERTENENCIA = mean(PERTENENCIA == 1, na.rm = TRUE) * 100,
+  CONADI = mean(CONADI == 1, na.rm = TRUE) * 100,
+  RSH = mean(RSH == 1, na.rm = TRUE) * 100,
+  PUEBLO_BIN = mean(PUEBLO_ORIGINARIO_BIN == 1, na.rm = TRUE) * 100
+), by = ANO_EGRESO][order(ANO_EGRESO)]
+
+
+print(representatividad_anual)
+```
+
 
