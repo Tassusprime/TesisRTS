@@ -70,3 +70,22 @@ lanzando el proyecto
 ```{r}
 usethis::use_github()
 ```
+
+generar el push
+
+```{r}
+git push origin y el nombre de la rama donde se trabaja
+```
+
+ver la branch
+
+```{r}
+usethis::git_default_branch_rediscover()
+```
+
+Crear un dashborad (no olvidar add y commit)
+
+```{r} usethis::edit_file(dashboard.Rmd)}
+```
+
+luego el collab hace un pull, para hacer el add, el comit y el push
