@@ -74,15 +74,19 @@ ahora el rcompendium
 rcompendium::set_credentials(
   given = "Rodolfo",
   family = "Tasso",
-  email = "rodolfo.tasso@gmail.com",
-  orcid = "probando lo pongo despues"
-)
+  email = "rodolfo.tasso@gmail.com")
 ```
 
 crear compendio
 
 ```{r}
 rcompendium::new_compendium()
+```
+
+editar compendio
+
+```{r}
+usethis::edit_r_profile()
 ```
 
 agregar mas archivos al proyecto
@@ -94,5 +98,18 @@ usethis::use_tidy_github()
 agregar renv si no lo hiciste al crear el proyecto
 
 ```{r}
+library(rcompendium)
 rcompendium::add_renv()
+```
+
+status renv
+
+```{r}
+renv::status()
+```
+
+crear lockfile
+
+```{r}
+renv::snapshot()
 ```

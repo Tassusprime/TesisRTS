@@ -88,4 +88,34 @@ Crear un dashborad (no olvidar add y commit)
 ```{r} usethis::edit_file(dashboard.Rmd)}
 ```
 
-luego el collab hace un pull, para hacer el add, el comit y el push
+luego el collaborador hace un pull, para hacer el add, el comit y el push
+
+CUANDO HAY CONFLICTO DE VERSIONES, GITHUB AVISA Y MARCA. POR LO QUE SE PUEDE ARREGLAR.
+
+Para pullear
+
+```{r eval=FALSE}
+##EN TERMINAL 
+git pull origin -ramaprincipal-
+```
+
+En archivo con conflicto para resolver, se hace merge antes de pushear.
+
+Comando para crear nunevas ramas
+
+desde git status
+
+```{r eval=FALSE}
+git status (muestra la rama)
+git branch newbranch{nombre de la rama nueva}
+git checkout newbranch(usando el nombre switchea entre ramas)
+```
+
+las nuevas ramas permiten dividir el trabajo sin que hayan conflictos y luego se fusionan
+
+praise yourself! xD
+
+```{r}
+library(praise)
+praise::praise()
+```
