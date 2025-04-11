@@ -1,4 +1,16 @@
-```{r}
+Librerias Necesarias
 
+```{r}
+library(tidyverse)
+library(ggplot2)
 ```
+
+Cargar
+
+```{r}
+rm(list = ls()) ##a pesar de que limpia el enviromet no limpia el proyecto de github
+load("base_reducida.RData")
+```
+
+View(datos_reducidos)
 
