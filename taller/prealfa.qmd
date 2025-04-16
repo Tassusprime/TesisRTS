@@ -73,7 +73,7 @@ Vuelve a correr sitrep
 setea la rama como se setea en alfa
 
 ```{r}
-usethis::git_default_branch_configure(name = "nombre de la rama")
+usethis::git_default_branch_configure(name = "COMPENDIO")
 ```
 
 ahora el rcompendium
@@ -95,7 +95,7 @@ getOption("email")
 crear compendio
 
 ```{r}
-rcompendium::new_compendium("Compendio")
+rcompendium::new_compendium("Compendioooo")
 ```
 
 cuando el compendio existe, lo que se puede hacer es iniciar el compendio para tener el resto de archivos
@@ -148,8 +148,37 @@ status renv
 renv::status()
 ```
 
+el install
+
+```{r}
+renv::install()
+```
+
 crear lockfile
 
 ```{r}
 renv::snapshot()
+```
+
+abrir excel
+
+```{r}
+#cargar paquetes
+library(readxl)
+library(tidyverse)
+
+#leer los datos
+dat <- readxl::read_xlsx("D:/MAGISTER/aa TESIS/TALLER R/linelist_20140701.xlsx")
+
+#limpiar datos
+dat_clean <- dat %>%
+  select(case_id,date_of_onset,date_of_outcome,outcome) %>%
+  mutate(across(.cols = c(date_of_onset,date_of_outcome),
+                .fns = as.Date)) %>%
+  mutate(outcome = fct(outcome, level = c("Death","Recover"),na= "NA"))
+
+#Escribir el dato limpio
+dat_clean %>%
+  write_rds("D:/MAGISTER/aa TESIS/TALLER R/linelist_clean.rds")
+
 ```
