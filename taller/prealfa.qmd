@@ -12,6 +12,7 @@ comandos remote
 if (!require("remotes")) install.packages("remotes")
 remotes::install_github("FRBCesab/rcompendium")
 remotes::install_github("benmarwick/rrtools")
+
 ```
 
 instalando paquetes en caso de no tenerlos
@@ -28,7 +29,14 @@ pak::pak(new)
 
 ```
 
-Verificar configuracion github
+```         
+```
+
+```{r}
+# Desde tu proyecto TesisRTS:
+usethis::use_r("funcion_base")
+r configuracion github
+```
 
 ```{r}
 gh::gh_whoami()
@@ -77,10 +85,42 @@ rcompendium::set_credentials(
   email = "rodolfo.tasso@gmail.com")
 ```
 
+```{r}
+getOption("given")
+getOption("family")
+getOption("email")
+
+```
+
 crear compendio
 
 ```{r}
-rcompendium::new_compendium()
+rcompendium::new_compendium("Compendio")
+```
+
+cuando el compendio existe, lo que se puede hacer es iniciar el compendio para tener el resto de archivos
+
+```{r}
+rcompendium::add_description()
+```
+
+```{r}
+rcompendium::add_readme_rmd()
+```
+
+```{r}
+rcompendium::add_license("MIT")
+```
+
+```{r}
+rcompendium::add_package_doc()
+
+```
+
+```{r}
+rcompendium::add_dependencies()
+rcompendium::add_rbuildignore()
+
 ```
 
 editar compendio
