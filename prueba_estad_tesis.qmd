@@ -4,8 +4,7 @@ format: html
 editor: visual
 ---
 
-```{Quarto}
-```
+Librerías
 
 ```{r}
 setwd("D:/MAGISTER/aa TESIS/BBDD NUEVA")
@@ -14,6 +13,8 @@ library(dplyr)
 library(data.table)
 ```
 
+Limpia ambiente y carga base cruda.
+
 ```{r}
 rm(list = ls())
 gc()
@@ -21,10 +22,6 @@ gc()
 datos <- fread("EH_2010_2022_Pasantes_v2_encrip.csv") 
 
 #view(datos)
-```
-
-```{r}
-
 ```
 
 ```{r}
