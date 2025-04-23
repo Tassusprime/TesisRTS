@@ -1,98 +1,224 @@
-Librerias Necesarias
+---
+title: "Rehaciendo bbdd"
+format: html
+editor: visual
+---
+
+```{Quarto}
+```
 
 ```{r}
+setwd("D:/MAGISTER/aa TESIS/BBDD NUEVA")
 library(tidyverse)
-library(ggplot2)
+library(dplyr)
 library(data.table)
-library(here)
 ```
 
-Cargar
-
 ```{r}
-rm(list = ls()) ##a pesar de que limpia el environmet no limpia el proyecto de github
-load("base_reducida.RData")
+rm(list = ls())
+gc()
+# Leer archivo CSV 
+datos <- fread("EH_2010_2022_Pasantes_v2_encrip.csv") 
+
+#view(datos)
 ```
 
-View(datos_reducidos)
-
-## Descriptivos
 ```{r}
-# Tamaño y estructura
-dim(datos_reducidos)
-str(datos_reducidos)
-summary(datos_reducidos)
-class(datos_reducidos)
-```
-Aprovechando pruebas para github
-
-```{r}
-# Revisar valores únicos en claves
-sapply(c("PERTENENCIA", "CONADI", "RSH", "PUEBLO_ORIGINARIO_BIN"), 
-       function(var) unique(datos_reducidos[[var]]))
 
 ```
 
-ver completitud
-
 ```{r}
-completitud <- datos_reducidos[, .(
-  PERTENENCIA_completo = mean(!is.na(PERTENENCIA)) * 100,
-  CONADI_completo = mean(!is.na(CONADI)) * 100,
-  RSH_completo = mean(!is.na(RSH)) * 100,
-  PUEBLO_BIN_completo = mean(!is.na(PUEBLO_ORIGINARIO_BIN)) * 100
-)]
+# Definir los rangos etarios según la OMS en un solo bloque
+datos[, Grupo_Edad := cut(EDAD_ANOS, 
+                          breaks = c(0, 4, 14, 24, 44, 64, 74, Inf), 
+                          labels = c("0-4", "5-14", "15-24", "25-44", "45-64", "65-74", "75+"), 
+                          right = FALSE)]
 
-print(completitud)
+# Verificar que la variable se creó correctamente
+print(table(datos$Grupo_Edad, useNA = "always"))
+
+
+# Modificar BENEF para agregar "FONASA" cuando GLOSA_PREVISION es FONASA
+datos[GLOSA_PREVISION == "FONASA" & !is.na(BENEF), BENEF := paste0("FONASA ", BENEF)]
+
+# Modificar GLOSA_PREVISION para dejar solo "FONASA", "ISAPRE" y cambiar todo lo demás a "Otro"
+datos[, GLOSA_PREVISION := fifelse(GLOSA_PREVISION %in% c("FONASA", "ISAPRE"), 
+                                   GLOSA_PREVISION, "Otro")]
+
+# Verificar los cambios
+print(unique(datos[, .(GLOSA_PREVISION, BENEF)]))
+
+
+# Convertir a character para evitar problemas con NA
+datos[, PUEBLO_ORIGINARIO := as.character(PUEBLO_ORIGINARIO)]
+
+# Crear la nueva variable binaria: 1 si pertenece a un pueblo originario, 0 si es 96 o NA
+datos[, PUEBLO_ORIGINARIO_BIN := fifelse(PUEBLO_ORIGINARIO %in% c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"), 1, 0)]
+
+# Verificar los resultados
+print(table(datos$PUEBLO_ORIGINARIO_BIN, useNA = "always"))
+
 ```
 
-completitud por año ACA HAY UN PROBLEMA
+```{r}
+# Contar combinaciones únicas entre las dos columnas
+combinaciones <- datos[, .N, by = .(CyA_Conadi, CI_Conadi)][order(-N)]
+print(combinaciones)
+
+```
 
 ```{r}
-##ACA HAY PROBLEMA
-datos_reducidos[, ANO_EGRESO := year(FECHA_EGRESO_FMT_DEIS)]
-completitud_anual <- datos_reducidos[, .(
-  PERTENENCIA = mean(!is.na(PERTENENCIA)) * 100,
-  CONADI = mean(!is.na(CONADI)) * 100,
-  RSH = mean(!is.na(RSH)) * 100,
-  PUEBLO_BIN = mean(!is.na(PUEBLO_ORIGINARIO_BIN)) * 100
+# Consolidar sin reemplazar NA con 0
+datos[, CONADI := fifelse(is.na(CyA_Conadi) & is.na(CI_Conadi), NA_integer_,
+                          pmax(CyA_Conadi, CI_Conadi, na.rm = TRUE))]
+
+```
+
+“Para la consolidación del indicador CONADI, se priorizó mantener los valores faltantes (`NA`) cuando ambos registros no presentaban información, siguiendo principios de integridad del dato clínico y evitando clasificar erróneamente como no pertenecientes a quienes simplemente no tienen el dato registrado.”
+
+```{r}
+datos[, CONADI := fifelse(is.na(CyA_Conadi) & is.na(CI_Conadi), NA_integer_,
+                          pmax(CyA_Conadi, CI_Conadi, na.rm = TRUE))]
+
+```
+
+```{r}
+library(data.table)
+
+# Asegurar formato fecha
+datos[, FECHA_EGRESO_FMT_DEIS := as.IDate(FECHA_EGRESO_FMT_DEIS)]
+
+# Crear columna de año
+datos[, ANO_EGRESO := year(FECHA_EGRESO_FMT_DEIS)]
+
+# Obtener el último año disponible
+ultimo_anio <- max(datos$ANO_EGRESO, na.rm = TRUE)
+
+# Filtrar registros de ese año
+datos_ultimo_anio <- datos[ANO_EGRESO == ultimo_anio]
+
+# Número total de egresos
+n_egresos <- nrow(datos_ultimo_anio)
+
+# Calcular porcentaje con NA en TODAS las columnas de pertenencia
+porcentaje_na_pertenencia <- datos_ultimo_anio[
+  is.na(CyA_Conadi) & is.na(CI_Conadi) & is.na(RSH) & is.na(PUEBLO_ORIGINARIO),
+  .N
+] / n_egresos * 100
+# Resultado para reportar
+cat(" Último año disponible:", ultimo_anio, "\n")
+cat(" Número total de egresos hospitalarios:", n_egresos, "\n")
+cat(" Porcentaje de registros con al menos un NA:", round(porcentaje_na_pertenencia, 2), "%\n")
+
+```
+
+```{r}
+sapply(datos_ultimo_anio[, .(CI_Conadi, CyA_Conadi, RSH, PUEBLO_ORIGINARIO)], 
+       function(x) sum(is.na(x)))
+
+```
+
+```{r}
+library(data.table)
+
+# Asegurar formato de fecha y año
+datos[, FECHA_EGRESO_FMT_DEIS := as.IDate(FECHA_EGRESO_FMT_DEIS)]
+datos[, ANO_EGRESO := year(FECHA_EGRESO_FMT_DEIS)]
+
+# Filtrar último año
+ultimo_anio <- max(datos$ANO_EGRESO, na.rm = TRUE)
+datos_ultimo_anio <- datos[ANO_EGRESO == ultimo_anio]
+
+# Número total de egresos
+n_egresos <- nrow(datos_ultimo_anio)
+
+# Calcular porcentaje con NA en TODAS las columnas de pertenencia
+porcentaje_na_pertenencia <- datos_ultimo_anio[
+  is.na(CyA_Conadi) & is.na(CI_Conadi) & is.na(RSH) & is.na(PUEBLO_ORIGINARIO),
+  .N
+] / n_egresos * 100
+
+# Mostrar resultados
+cat("📌 Último año disponible:", ultimo_anio, "\n")
+cat("📊 Total de egresos hospitalarios:", n_egresos, "\n")
+cat("⚠️ Porcentaje con NA en TODAS las columnas de pertenencia:", 
+    round(porcentaje_na_pertenencia, 2), "%\n")
+
+```
+
+```{r}
+porcentaje_na_pertenencia <- datos_ultimo_anio[
+  is.na(CI_Conadi) & is.na(CyA_Conadi) & is.na(RSH),
+  .N
+] / n_egresos * 100
+
+```
+
+```{r}
+
+# Asegurar columna de año
+datos[, FECHA_EGRESO_FMT_DEIS := as.IDate(FECHA_EGRESO_FMT_DEIS)]
+datos[, ANO_EGRESO := year(FECHA_EGRESO_FMT_DEIS)]
+
+# Calcular cantidad de registros no NA por año
+conteo_por_fuente <- datos[, .(
+  Registros_CI_Conadi     = sum(!is.na(CI_Conadi)),
+  Registros_CyA_Conadi    = sum(!is.na(CyA_Conadi)),
+  Registros_RSH           = sum(!is.na(RSH)),
+  Registros_Pueblo_Orig   = sum(!is.na(PUEBLO_ORIGINARIO))
 ), by = ANO_EGRESO][order(ANO_EGRESO)]
 
-print(completitud_anual)
+
 ```
 
-
-
-
-evaluando representatividad total
-
 ```{r}
-representatividad <- datos_reducidos[, .(
-  PERTENENCIA_indigena = mean(PERTENENCIA == 1, na.rm = TRUE) * 100,
-  CONADI_indigena = mean(CONADI == 1, na.rm = TRUE) * 100,
-  RSH_indigena = mean(RSH == 1, na.rm = TRUE) * 100,
-  PUEBLO_BIN_indigena = mean(PUEBLO_ORIGINARIO_BIN == 1, na.rm = TRUE) * 100
-)]
 
-print(representatividad)
-```
+# Asegurar formato de fecha y columna año
+datos[, FECHA_EGRESO_FMT_DEIS := as.IDate(FECHA_EGRESO_FMT_DEIS)]
+datos[, ANO_EGRESO := year(FECHA_EGRESO_FMT_DEIS)]
 
-Ahora representatividad segun año
-
-```{r}
-# Extraer el año
-datos_reducidos[, ANO_EGRESO := year(FECHA_EGRESO_FMT_DEIS)]
-
-#repreentatividad por año
-representatividad_anual <- datos_reducidos[, .(
-  PERTENENCIA = mean(PERTENENCIA == 1, na.rm = TRUE) * 100,
-  CONADI = mean(CONADI == 1, na.rm = TRUE) * 100,
-  RSH = mean(RSH == 1, na.rm = TRUE) * 100,
-  PUEBLO_BIN = mean(PUEBLO_ORIGINARIO_BIN == 1, na.rm = TRUE) * 100
+# Calcular total, NA y %NA por variable y año
+resumen_na <- datos[, .(
+  Total = .N,
+  CI_Conadi_NA      = sum(is.na(CI_Conadi)),
+  CyA_Conadi_NA     = sum(is.na(CyA_Conadi)),
+  RSH_NA            = sum(is.na(RSH)),
+  PUEBLO_ORIG_NA    = sum(is.na(PUEBLO_ORIGINARIO)),
+  
+  CI_Conadi_PercNA   = sum(is.na(CI_Conadi)) / .N * 100,
+  CyA_Conadi_PercNA  = sum(is.na(CyA_Conadi)) / .N * 100,
+  RSH_PercNA         = sum(is.na(RSH)) / .N * 100,
+  PUEBLO_ORIG_PercNA = sum(is.na(PUEBLO_ORIGINARIO)) / .N * 100
 ), by = ANO_EGRESO][order(ANO_EGRESO)]
 
+print(resumen_na)
 
-print(representatividad_anual)
 ```
 
+```{r}
+print(resumen_na[ANO_EGRESO == 2022])
 
+```
+
+```{r}
+
+datos[, ANO_EGRESO := year(FECHA_EGRESO_FMT_DEIS)]
+
+
+pertenencias <- c("PUEBLO_ORIGINARIO", "CI_Conadi","CYA_Conadi", "RSH")
+
+resumen <- lapply(cols, functions(var {
+  lapply(anios, function(anio) {
+    subset <- datos[ANO_EGRESO == anio, ..var]
+    resu <- summary(as.factor(subset[[1]]))
+    resturn(data.table(Ano = anio, Variable = var, Valor = names(resu), Frecuencia = as.integer(resu))
+            )}
+})
+
+
+        )
+```
+
+```{r}
+summary(datos[ANO_EGRESO == 2022, as.factor(PUEBLO_ORIGINARIO)])
+```
