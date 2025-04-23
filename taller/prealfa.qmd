@@ -182,3 +182,15 @@ dat_clean %>%
   write_rds("D:/MAGISTER/aa TESIS/TALLER R/linelist_clean.rds")
 
 ```
+
+crear el cuadro de incidencias
+
+```{r}
+#cargar paquetes
+library(tidyverse)
+library(incidence2)
+
+#leer dato
+
+ebola_dat <- read_rds("D:/MAGISTER/aa TESIS/TALLER R/linelist_clean.rds")
+```
