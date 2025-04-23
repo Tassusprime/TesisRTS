@@ -73,7 +73,7 @@ Vuelve a correr sitrep
 setea la rama como se setea en alfa
 
 ```{r}
-usethis::git_default_branch_configure(name = "COMPENDIO")
+usethis::git_default_branch_configure(name = "origin")
 ```
 
 ahora el rcompendium
@@ -95,7 +95,7 @@ getOption("email")
 crear compendio
 
 ```{r}
-rcompendium::new_compendium("Compendioooo")
+rcompendium::new_compendium()
 ```
 
 cuando el compendio existe, lo que se puede hacer es iniciar el compendio para tener el resto de archivos
