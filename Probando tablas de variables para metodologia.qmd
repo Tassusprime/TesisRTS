@@ -33,7 +33,7 @@ tabla_op <- tibble::tibble(
     "Pertenencia a pueblo originario",
     "Edad",
     "Sexo",
-    "Región de residencia",
+    "Región de establecimiento",
     "Diagnóstico de egreso (CIE-10)",
     "Grupo de enfermedad",
     "Evento hospitalario único"
@@ -41,7 +41,7 @@ tabla_op <- tibble::tibble(
   Tipo = c(
     "Categorica nominal dicotómica (Sí/No)",
     "Cuantitativa discreta / agrupada",
-    "Categorica nominal dicotómica",
+    "Categorica nominal",
     "Categorica nominal",
     "Categorica nominal",
     "Categorica ordinal",
@@ -50,11 +50,11 @@ tabla_op <- tibble::tibble(
   `Definición operacional` = c(
     "Se define como 1 si el individuo se autoidentifica como indígena o posee certificado CONADI; 0 en caso contrario. Los valores faltantes fueron codificados como 0 para el análisis.",
     "Edad en años cumplidos al momento del egreso. Agrupada en tramos etarios para análisis comparativo.",
-    "Sexo registrado en el evento hospitalario (Hombre/Mujer).",
+    "Sexo registrado en el evento hospitalario (Hombre/Mujer/Otro).",
     "Se asigna según código del establecimiento de egreso hospitalario.",
     "Código de diagnóstico principal según Clasificación Internacional de Enfermedades (OMS, 2016).",
     "Derivada del diagnóstico, agrupada por capítulo o grupo nosológico (infecciosas, crónicas, etc.).",
-    "RUN por año para evitar duplicación en análisis de representatividad. Se mantienen duplicados para análisis epidemiológico."
+    "RUN anonimizado por año para evitar duplicación en análisis de representatividad. Se mantienen duplicados para análisis epidemiológico."
   ),
   `Fuente de datos` = rep("MINSAL", 7)
 ) %>% 
@@ -79,15 +79,25 @@ tabla_gt <- gt(tabla_op) %>%
     `Definición operacional` = "Definición operacional",
     `Fuente de datos` = "Fuente de datos",
     `Uso en el estudio` = "Uso en el estudio"
+  ) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(columns = Variable)
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#003366"),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = cell_text(color = "white", weight = "bold"),
+    locations = cells_column_labels()
   )
-
 tabla_gt
 ```
 
-## Exportar la tabla como imagen (opcional)
+## Exportar
 
 ```{r exportar-tabla, eval=FALSE}
-# gtsave(tabla_gt, "tabla_operacionalizacion.png")
+gtsave(tabla_gt, "D:/MAGISTER/aa TESIS/TesisRTS/FIGURES/tabla_operacionalizacion.png")
 ```
-
-Puedes subir la imagen a Google Docs o incluirla directamente en reportes Quarto o Word.
